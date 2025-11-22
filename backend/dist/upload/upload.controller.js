@@ -30,6 +30,74 @@ let UploadController = class UploadController {
             message: 'File uploaded successfully',
         };
     }
+    async getSignedUrl(url) {
+        if (!url) {
+            throw new common_1.BadRequestException('URL parameter is required');
+        }
+        const signedUrl = await this.uploadService.getSignedUrl(url);
+        return {
+            signedUrl,
+        };
+    }
+    async getImage(path, url, res) {
+        const urlOrPath = path || url;
+        if (!urlOrPath) {
+            throw new common_1.BadRequestException('path or url parameter is required');
+        }
+        try {
+            const { Body, ContentType } = await this.uploadService.getImageStream(urlOrPath);
+            if (ContentType) {
+                res.setHeader('Content-Type', ContentType);
+            }
+            else {
+                res.setHeader('Content-Type', 'image/jpeg');
+            }
+            res.setHeader('Cache-Control', 'public, max-age=3600');
+            res.setHeader('ETag', `"${urlOrPath}"`);
+            const chunks = [];
+            if (Body && typeof Body === 'object') {
+                if (Body instanceof Buffer) {
+                    return res.send(Body);
+                }
+                if (typeof Body.transformToByteArray === 'function') {
+                    const buffer = await Body.transformToByteArray();
+                    return res.send(Buffer.from(buffer));
+                }
+                if (Symbol.asyncIterator in Body || Symbol.iterator in Body) {
+                    for await (const chunk of Body) {
+                        chunks.push(chunk instanceof Uint8Array ? chunk : new Uint8Array(chunk));
+                    }
+                    return res.send(Buffer.concat(chunks.map(chunk => Buffer.from(chunk))));
+                }
+                if (typeof Body.pipe === 'function') {
+                    return Body.pipe(res);
+                }
+            }
+            const buffer = await this.streamToBuffer(Body);
+            res.send(buffer);
+        }
+        catch (error) {
+            console.error('Error streaming image:', error);
+            throw new common_1.NotFoundException('Image not found');
+        }
+    }
+    async streamToBuffer(stream) {
+        const chunks = [];
+        if (stream instanceof Buffer) {
+            return stream;
+        }
+        if (stream && typeof stream.transformToByteArray === 'function') {
+            const array = await stream.transformToByteArray();
+            return Buffer.from(array);
+        }
+        if (stream && (Symbol.asyncIterator in stream || Symbol.iterator in stream)) {
+            for await (const chunk of stream) {
+                chunks.push(Buffer.from(chunk));
+            }
+            return Buffer.concat(chunks);
+        }
+        throw new Error('Unable to convert stream to buffer');
+    }
 };
 exports.UploadController = UploadController;
 __decorate([
@@ -50,6 +118,22 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], UploadController.prototype, "uploadImage", null);
+__decorate([
+    (0, common_1.Get)('signed-url'),
+    __param(0, (0, common_1.Query)('url')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], UploadController.prototype, "getSignedUrl", null);
+__decorate([
+    (0, common_1.Get)('image'),
+    __param(0, (0, common_1.Query)('path')),
+    __param(1, (0, common_1.Query)('url')),
+    __param(2, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, String, Object]),
+    __metadata("design:returntype", Promise)
+], UploadController.prototype, "getImage", null);
 exports.UploadController = UploadController = __decorate([
     (0, common_1.Controller)('upload'),
     __metadata("design:paramtypes", [upload_service_1.UploadService])

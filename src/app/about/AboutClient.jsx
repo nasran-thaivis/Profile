@@ -2,9 +2,26 @@
 
 import { useState, useEffect } from "react";
 import Container from "../components/Container";
+import { getSignedImageUrl } from "../../lib/imageUtils";
 
 // === คีย์สำหรับอ่านข้อมูลจาก localStorage ===
 const STORAGE_KEY = "admin_about_content";
+
+// === Component สำหรับแสดงรูปภาพพร้อม proxy URL ===
+const ProfileImageWithSignedUrl = ({ src, alt, className }) => {
+  if (!src) return null;
+
+  // แปลง URL เป็น proxy URL ถ้าเป็น DigitalOcean Spaces URL
+  const imageUrl = getSignedImageUrl(src);
+
+  return (
+    <img
+      src={imageUrl}
+      alt={alt}
+      className={className}
+    />
+  );
+};
 
 // === ข้อมูลเริ่มต้น ===
 const DEFAULT_DATA = {
@@ -52,7 +69,7 @@ export default function AboutClient() {
           <div className="flex justify-center my-8">
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full blur opacity-75 group-hover:opacity-100 transition duration-300"></div>
-              <img
+              <ProfileImageWithSignedUrl
                 src={data.imageUrl}
                 alt={data.title}
                 className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full object-cover border-4 border-white shadow-2xl"

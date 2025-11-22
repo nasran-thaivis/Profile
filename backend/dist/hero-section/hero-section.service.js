@@ -12,16 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.HeroSectionService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const upload_service_1 = require("../upload/upload.service");
 let HeroSectionService = class HeroSectionService {
-    constructor(prisma) {
+    constructor(prisma, uploadService) {
         this.prisma = prisma;
+        this.uploadService = uploadService;
     }
     async findOne() {
         const hero = await this.prisma.heroSection.findUnique({
             where: { id: 1 },
         });
+        let result;
         if (!hero) {
-            return this.prisma.heroSection.create({
+            result = await this.prisma.heroSection.create({
                 data: {
                     id: 1,
                     title: 'Welcome',
@@ -30,24 +33,43 @@ let HeroSectionService = class HeroSectionService {
                 },
             });
         }
-        return hero;
+        else {
+            result = hero;
+        }
+        if (result.imageUrl) {
+            result.imageUrl = this.uploadService.getProxyUrl(result.imageUrl);
+        }
+        return result;
     }
-    update(updateHeroSectionDto) {
-        return this.prisma.heroSection.upsert({
+    async update(updateHeroSectionDto) {
+        const normalizedData = {
+            ...updateHeroSectionDto,
+            imageUrl: updateHeroSectionDto.imageUrl !== undefined
+                ? (updateHeroSectionDto.imageUrl
+                    ? this.uploadService.normalizeImageUrl(updateHeroSectionDto.imageUrl)
+                    : updateHeroSectionDto.imageUrl)
+                : undefined,
+        };
+        const result = await this.prisma.heroSection.upsert({
             where: { id: 1 },
-            update: updateHeroSectionDto,
+            update: normalizedData,
             create: {
                 id: 1,
                 title: 'Welcome',
                 description: 'This is my portfolio',
-                ...updateHeroSectionDto,
+                ...normalizedData,
             },
         });
+        if (result.imageUrl) {
+            result.imageUrl = this.uploadService.getProxyUrl(result.imageUrl);
+        }
+        return result;
     }
 };
 exports.HeroSectionService = HeroSectionService;
 exports.HeroSectionService = HeroSectionService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        upload_service_1.UploadService])
 ], HeroSectionService);
 //# sourceMappingURL=hero-section.service.js.map

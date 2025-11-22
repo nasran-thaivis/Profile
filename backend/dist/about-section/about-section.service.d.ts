@@ -1,20 +1,16 @@
 import { CreateAboutSectionDto } from './dto/create-about-section.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 export declare class AboutSectionService {
     private prisma;
-    constructor(prisma: PrismaService);
-    findOne(): Promise<{
+    private uploadService;
+    constructor(prisma: PrismaService, uploadService: UploadService);
+    findOne(): Promise<any>;
+    update(createAboutSectionDto: CreateAboutSectionDto): Promise<{
         id: number;
-        updatedAt: Date;
         title: string;
         description: string | null;
         imageUrl: string | null;
+        updatedAt: Date;
     }>;
-    update(createAboutSectionDto: CreateAboutSectionDto): import(".prisma/client").Prisma.Prisma__AboutSectionClient<{
-        id: number;
-        updatedAt: Date;
-        title: string;
-        description: string | null;
-        imageUrl: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
 }

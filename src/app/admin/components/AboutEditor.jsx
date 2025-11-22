@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { getSignedImageUrl } from "../../../lib/imageUtils";
 
 export default function AboutEditor() {
   const [formData, setFormData] = useState({
@@ -17,7 +18,12 @@ export default function AboutEditor() {
       try {
         const res = await fetch("http://localhost:3005/api/about-section");
         const data = await res.json();
-        if (data) setFormData(data);
+        if (data) {
+          setFormData({
+            ...data,
+            imageUrl: data.imageUrl ? getSignedImageUrl(data.imageUrl) : data.imageUrl,
+          });
+        }
       } catch (error) {
         console.error(error);
       } finally {
@@ -59,7 +65,7 @@ export default function AboutEditor() {
       }
 
       const { url } = await uploadRes.json();
-      setFormData({ ...formData, imageUrl: url });
+      setFormData({ ...formData, imageUrl: getSignedImageUrl(url) });
       alert('✅ อัปโหลดรูปภาพสำเร็จ!');
     } catch (error) {
       console.error(error);
@@ -160,7 +166,7 @@ export default function AboutEditor() {
           {/* Preview Image */}
           {formData.imageUrl && (
             <div className="mt-4 h-40 w-full rounded-lg overflow-hidden bg-gray-100 border">
-              <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+              <img src={getSignedImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover" />
             </div>
           )}
         </div>

@@ -1,5 +1,7 @@
 "use client";
 
+import { getSignedImageUrl } from "../../../lib/imageUtils";
+
 /**
  * AboutPreview Component
  * แสดงตัวอย่างหน้า About ก่อนบันทึก
@@ -32,7 +34,7 @@ export default function AboutPreview({ data }) {
             <div className="relative group">
               <div className="absolute -inset-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full blur opacity-75"></div>
               <img
-                src={data.imageUrl}
+                src={getSignedImageUrl(data.imageUrl)}
                 alt={data.title}
                 className="relative w-40 h-40 rounded-full object-cover border-4 border-white shadow-xl"
                 onError={(e) => {

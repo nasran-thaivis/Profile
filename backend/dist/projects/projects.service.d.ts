@@ -1,52 +1,54 @@
 import { CreateProjectDto } from './dto/create-project.dto';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 export declare class ProjectsService {
     private prisma;
-    constructor(prisma: PrismaService);
-    create(createProjectDto: CreateProjectDto): import(".prisma/client").Prisma.Prisma__ProjectClient<{
+    private uploadService;
+    constructor(prisma: PrismaService, uploadService: UploadService);
+    create(createProjectDto: CreateProjectDto): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        link: string | null;
         title: string;
         description: string | null;
         imageUrl: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    findAll(): import(".prisma/client").Prisma.PrismaPromise<{
-        id: string;
+        link: string | null;
         createdAt: Date;
         updatedAt: Date;
-        link: string | null;
+    }>;
+    findAll(): Promise<{
+        id: string;
         title: string;
         description: string | null;
         imageUrl: string | null;
+        link: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }[]>;
-    findOne(id: string): import(".prisma/client").Prisma.Prisma__ProjectClient<{
+    findOne(id: string): Promise<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        link: string | null;
         title: string;
         description: string | null;
         imageUrl: string | null;
-    }, null, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    update(id: string, updateProjectDto: UpdateProjectDto): import(".prisma/client").Prisma.Prisma__ProjectClient<{
-        id: string;
+        link: string | null;
         createdAt: Date;
         updatedAt: Date;
-        link: string | null;
+    }>;
+    update(id: string, updateProjectDto: UpdateProjectDto): Promise<{
+        id: string;
         title: string;
         description: string | null;
         imageUrl: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
+        link: string | null;
+        createdAt: Date;
+        updatedAt: Date;
+    }>;
     remove(id: string): import(".prisma/client").Prisma.Prisma__ProjectClient<{
         id: string;
-        createdAt: Date;
-        updatedAt: Date;
-        link: string | null;
         title: string;
         description: string | null;
         imageUrl: string | null;
+        link: string | null;
+        createdAt: Date;
+        updatedAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
 }

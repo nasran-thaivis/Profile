@@ -1,3 +1,4 @@
+import { Response } from 'express';
 import { UploadService } from './upload.service';
 export declare class UploadController {
     private readonly uploadService;
@@ -6,4 +7,9 @@ export declare class UploadController {
         url: string;
         message: string;
     }>;
+    getSignedUrl(url: string): Promise<{
+        signedUrl: string;
+    }>;
+    getImage(path: string, url: string, res: Response): Promise<any>;
+    private streamToBuffer;
 }

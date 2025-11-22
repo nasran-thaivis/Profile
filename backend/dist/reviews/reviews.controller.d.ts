@@ -3,28 +3,28 @@ import { CreateReviewDto } from './dto/create-review.dto';
 export declare class ReviewsController {
     private readonly reviewsService;
     constructor(reviewsService: ReviewsService);
-    create(createReviewDto: CreateReviewDto): import(".prisma/client").Prisma.Prisma__ReviewClient<{
+    create(createReviewDto: CreateReviewDto): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         rating: number;
         comment: string;
         avatarUrl: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
-    findAll(): import(".prisma/client").Prisma.PrismaPromise<{
+        createdAt: Date;
+    }>;
+    findAll(): Promise<{
         id: string;
         name: string;
-        createdAt: Date;
         rating: number;
         comment: string;
         avatarUrl: string | null;
+        createdAt: Date;
     }[]>;
     remove(id: string): import(".prisma/client").Prisma.Prisma__ReviewClient<{
         id: string;
         name: string;
-        createdAt: Date;
         rating: number;
         comment: string;
         avatarUrl: string | null;
+        createdAt: Date;
     }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
 }

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { getSignedImageUrl } from "../lib/imageUtils";
 
 // 1. ฟังก์ชันดึงข้อมูลจาก Backend (Server Side)
 async function getHeroData() {
@@ -12,7 +13,12 @@ async function getHeroData() {
       throw new Error("Failed to fetch hero data");
     }
 
-    return res.json();
+    const data = await res.json();
+    // แปลง imageUrl เป็น full backend URL
+    if (data && data.imageUrl) {
+      data.imageUrl = getSignedImageUrl(data.imageUrl);
+    }
+    return data;
   } catch (error) {
     console.error("Error loading home data:", error);
     return null;

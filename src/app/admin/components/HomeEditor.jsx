@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { getSignedImageUrl } from "../../../lib/imageUtils";
 
 export default function HomeEditor() {
   const [formData, setFormData] = useState({
@@ -22,7 +23,7 @@ export default function HomeEditor() {
           setFormData({
             title: data.title,
             description: data.description,
-            imageUrl: data.imageUrl,
+            imageUrl: data.imageUrl ? getSignedImageUrl(data.imageUrl) : data.imageUrl,
           });
         }
       } catch (error) {
@@ -68,7 +69,7 @@ export default function HomeEditor() {
       }
 
       const { url } = await uploadRes.json();
-      setFormData({ ...formData, imageUrl: url });
+      setFormData({ ...formData, imageUrl: getSignedImageUrl(url) });
       alert('✅ อัปโหลดรูปภาพสำเร็จ!');
     } catch (error) {
       console.error(error);
@@ -185,7 +186,7 @@ export default function HomeEditor() {
           {/* Preview Image */}
           {formData.imageUrl && (
             <div className="mt-4 h-40 w-full rounded-lg overflow-hidden bg-gray-100 border">
-              <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+              <img src={getSignedImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover" />
             </div>
           )}
         </div>

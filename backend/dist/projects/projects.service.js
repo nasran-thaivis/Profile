@@ -12,28 +12,62 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ProjectsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const upload_service_1 = require("../upload/upload.service");
 let ProjectsService = class ProjectsService {
-    constructor(prisma) {
+    constructor(prisma, uploadService) {
         this.prisma = prisma;
+        this.uploadService = uploadService;
     }
-    create(createProjectDto) {
-        return this.prisma.project.create({
-            data: createProjectDto,
+    async create(createProjectDto) {
+        const normalizedData = {
+            ...createProjectDto,
+            imageUrl: createProjectDto.imageUrl
+                ? this.uploadService.normalizeImageUrl(createProjectDto.imageUrl)
+                : createProjectDto.imageUrl,
+        };
+        const project = await this.prisma.project.create({
+            data: normalizedData,
         });
+        if (project.imageUrl) {
+            project.imageUrl = this.uploadService.getProxyUrl(project.imageUrl);
+        }
+        return project;
     }
-    findAll() {
-        return this.prisma.project.findMany({
+    async findAll() {
+        const projects = await this.prisma.project.findMany({
             orderBy: { createdAt: 'desc' },
         });
-    }
-    findOne(id) {
-        return this.prisma.project.findUnique({ where: { id } });
-    }
-    update(id, updateProjectDto) {
-        return this.prisma.project.update({
-            where: { id },
-            data: updateProjectDto,
+        return projects.map((project) => {
+            if (project.imageUrl) {
+                project.imageUrl = this.uploadService.getProxyUrl(project.imageUrl);
+            }
+            return project;
         });
+    }
+    async findOne(id) {
+        const project = await this.prisma.project.findUnique({ where: { id } });
+        if (project && project.imageUrl) {
+            project.imageUrl = this.uploadService.getProxyUrl(project.imageUrl);
+        }
+        return project;
+    }
+    async update(id, updateProjectDto) {
+        const normalizedData = {
+            ...updateProjectDto,
+            imageUrl: updateProjectDto.imageUrl !== undefined
+                ? (updateProjectDto.imageUrl
+                    ? this.uploadService.normalizeImageUrl(updateProjectDto.imageUrl)
+                    : updateProjectDto.imageUrl)
+                : undefined,
+        };
+        const project = await this.prisma.project.update({
+            where: { id },
+            data: normalizedData,
+        });
+        if (project.imageUrl) {
+            project.imageUrl = this.uploadService.getProxyUrl(project.imageUrl);
+        }
+        return project;
     }
     remove(id) {
         return this.prisma.project.delete({ where: { id } });
@@ -42,6 +76,7 @@ let ProjectsService = class ProjectsService {
 exports.ProjectsService = ProjectsService;
 exports.ProjectsService = ProjectsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        upload_service_1.UploadService])
 ], ProjectsService);
 //# sourceMappingURL=projects.service.js.map

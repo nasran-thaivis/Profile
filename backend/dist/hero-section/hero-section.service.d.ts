@@ -1,22 +1,17 @@
 import { UpdateHeroSectionDto } from './dto/update-hero-section.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { UploadService } from '../upload/upload.service';
 export declare class HeroSectionService {
     private prisma;
-    constructor(prisma: PrismaService);
-    findOne(): Promise<{
+    private uploadService;
+    constructor(prisma: PrismaService, uploadService: UploadService);
+    findOne(): Promise<any>;
+    update(updateHeroSectionDto: UpdateHeroSectionDto): Promise<{
         id: number;
-        updatedAt: Date;
         title: string;
         description: string | null;
-        imageUrl: string | null;
         logoUrl: string | null;
+        imageUrl: string | null;
+        updatedAt: Date;
     }>;
-    update(updateHeroSectionDto: UpdateHeroSectionDto): import(".prisma/client").Prisma.Prisma__HeroSectionClient<{
-        id: number;
-        updatedAt: Date;
-        title: string;
-        description: string | null;
-        imageUrl: string | null;
-        logoUrl: string | null;
-    }, never, import("@prisma/client/runtime/library").DefaultArgs, import(".prisma/client").Prisma.PrismaClientOptions>;
 }

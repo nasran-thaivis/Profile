@@ -12,16 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AboutSectionService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const upload_service_1 = require("../upload/upload.service");
 let AboutSectionService = class AboutSectionService {
-    constructor(prisma) {
+    constructor(prisma, uploadService) {
         this.prisma = prisma;
+        this.uploadService = uploadService;
     }
     async findOne() {
         const about = await this.prisma.aboutSection.findUnique({
             where: { id: 1 },
         });
+        let result;
         if (!about) {
-            return this.prisma.aboutSection.create({
+            result = await this.prisma.aboutSection.create({
                 data: {
                     id: 1,
                     title: 'About Me',
@@ -30,22 +33,41 @@ let AboutSectionService = class AboutSectionService {
                 },
             });
         }
-        return about;
+        else {
+            result = about;
+        }
+        if (result.imageUrl) {
+            result.imageUrl = this.uploadService.getProxyUrl(result.imageUrl);
+        }
+        return result;
     }
-    update(createAboutSectionDto) {
-        return this.prisma.aboutSection.upsert({
+    async update(createAboutSectionDto) {
+        const normalizedData = {
+            ...createAboutSectionDto,
+            imageUrl: createAboutSectionDto.imageUrl !== undefined
+                ? (createAboutSectionDto.imageUrl
+                    ? this.uploadService.normalizeImageUrl(createAboutSectionDto.imageUrl)
+                    : createAboutSectionDto.imageUrl)
+                : undefined,
+        };
+        const result = await this.prisma.aboutSection.upsert({
             where: { id: 1 },
-            update: createAboutSectionDto,
+            update: normalizedData,
             create: {
                 id: 1,
-                ...createAboutSectionDto,
+                ...normalizedData,
             },
         });
+        if (result.imageUrl) {
+            result.imageUrl = this.uploadService.getProxyUrl(result.imageUrl);
+        }
+        return result;
     }
 };
 exports.AboutSectionService = AboutSectionService;
 exports.AboutSectionService = AboutSectionService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        upload_service_1.UploadService])
 ], AboutSectionService);
 //# sourceMappingURL=about-section.service.js.map

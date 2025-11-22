@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { getSignedImageUrl } from "../../../lib/imageUtils";
 
 export default function PortfolioEditor() {
   const [projects, setProjects] = useState([]);
@@ -28,7 +29,12 @@ export default function PortfolioEditor() {
     try {
       const res = await fetch("http://localhost:3005/api/projects");
       const data = await res.json();
-      setProjects(data);
+      // แปลง imageUrl เป็น full backend URL สำหรับแต่ละ project
+      const projectsWithFullUrls = data.map((project) => ({
+        ...project,
+        imageUrl: project.imageUrl ? getSignedImageUrl(project.imageUrl) : project.imageUrl,
+      }));
+      setProjects(projectsWithFullUrls);
       setIsLoading(false);
     } catch (error) {
       console.error("Failed to fetch projects", error);
@@ -68,7 +74,7 @@ export default function PortfolioEditor() {
       }
 
       const { url } = await uploadRes.json();
-      setFormData({ ...formData, imageUrl: url });
+      setFormData({ ...formData, imageUrl: getSignedImageUrl(url) });
       alert('✅ อัปโหลดรูปภาพสำเร็จ!');
     } catch (error) {
       console.error(error);
@@ -147,7 +153,7 @@ export default function PortfolioEditor() {
       }
 
       const { url } = await uploadRes.json();
-      setEditingProject({ ...editingProject, imageUrl: url });
+      setEditingProject({ ...editingProject, imageUrl: getSignedImageUrl(url) });
       alert('✅ อัปโหลดรูปภาพสำเร็จ!');
     } catch (error) {
       console.error(error);
@@ -275,7 +281,7 @@ export default function PortfolioEditor() {
 
             {formData.imageUrl && (
               <div className="mt-4 h-40 w-full rounded-lg overflow-hidden bg-gray-100 border">
-                <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                <img src={getSignedImageUrl(formData.imageUrl)} alt="Preview" className="w-full h-full object-cover" />
               </div>
             )}
           </div>
@@ -363,7 +369,7 @@ export default function PortfolioEditor() {
 
               {editingProject.imageUrl && (
                 <div className="mt-4 h-40 w-full rounded-lg overflow-hidden bg-gray-100 border">
-                  <img src={editingProject.imageUrl} alt="Preview" className="w-full h-full object-cover" />
+                  <img src={getSignedImageUrl(editingProject.imageUrl)} alt="Preview" className="w-full h-full object-cover" />
                 </div>
               )}
             </div>
@@ -419,7 +425,7 @@ export default function PortfolioEditor() {
                   <tr key={project.id} className="border-b hover:bg-gray-50 transition">
                     <td className="p-4">
                       <img 
-                        src={project.imageUrl || "https://placehold.co/100"} 
+                        src={project.imageUrl ? getSignedImageUrl(project.imageUrl) : "https://placehold.co/100"} 
                         alt={project.title} 
                         className="w-20 h-14 object-cover rounded shadow-sm"
                       />

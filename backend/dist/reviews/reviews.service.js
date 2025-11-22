@@ -12,20 +12,35 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ReviewsService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
+const upload_service_1 = require("../upload/upload.service");
 let ReviewsService = class ReviewsService {
-    constructor(prisma) {
+    constructor(prisma, uploadService) {
         this.prisma = prisma;
+        this.uploadService = uploadService;
     }
-    create(createReviewDto) {
+    async create(createReviewDto) {
         const data = {
             ...createReviewDto,
-            rating: Number(createReviewDto.rating)
+            rating: Number(createReviewDto.rating),
+            avatarUrl: createReviewDto.avatarUrl
+                ? this.uploadService.normalizeImageUrl(createReviewDto.avatarUrl)
+                : createReviewDto.avatarUrl,
         };
-        return this.prisma.review.create({ data });
+        const review = await this.prisma.review.create({ data });
+        if (review.avatarUrl) {
+            review.avatarUrl = this.uploadService.getProxyUrl(review.avatarUrl);
+        }
+        return review;
     }
-    findAll() {
-        return this.prisma.review.findMany({
+    async findAll() {
+        const reviews = await this.prisma.review.findMany({
             orderBy: { createdAt: 'desc' },
+        });
+        return reviews.map((review) => {
+            if (review.avatarUrl) {
+                review.avatarUrl = this.uploadService.getProxyUrl(review.avatarUrl);
+            }
+            return review;
         });
     }
     remove(id) {
@@ -37,6 +52,7 @@ let ReviewsService = class ReviewsService {
 exports.ReviewsService = ReviewsService;
 exports.ReviewsService = ReviewsService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService,
+        upload_service_1.UploadService])
 ], ReviewsService);
 //# sourceMappingURL=reviews.service.js.map

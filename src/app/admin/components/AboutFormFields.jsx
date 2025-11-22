@@ -1,5 +1,7 @@
 "use client";
 
+import { getSignedImageUrl } from "../../../lib/imageUtils";
+
 /**
  * AboutFormFields Component
  * ฟอร์มสำหรับแก้ไขข้อมูล About page
@@ -64,7 +66,7 @@ export default function AboutFormFields({ data, onChange, onSave }) {
           <div className="mt-3">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
-              src={data.imageUrl}
+              src={getSignedImageUrl(data.imageUrl)}
               alt="Preview"
               className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
               onError={(e) => {

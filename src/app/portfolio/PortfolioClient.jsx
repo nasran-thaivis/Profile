@@ -1,10 +1,29 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Container from "../components/Container";
+import { getSignedImageUrl } from "../../lib/imageUtils";
 
 // === คีย์สำหรับเก็บข้อมูลใน localStorage ===
 const STORAGE_KEY = "portfolio_items_v1";
+
+// === Component สำหรับแสดงรูปภาพพร้อม proxy URL ===
+const ImageWithSignedUrl = ({ src, alt, className }) => {
+  // แปลง URL เป็น proxy URL ถ้าเป็น DigitalOcean Spaces URL
+  const imageUrl = getSignedImageUrl(src);
+
+  return (
+    <img
+      src={imageUrl}
+      alt={alt}
+      className={className}
+      onError={(e) => {
+        // ถ้ารูปภาพโหลดไม่ได้ ให้แสดง placeholder
+        e.target.src = "https://via.placeholder.com/800x400/1f2937/9ca3af?text=No+Image";
+      }}
+    />
+  );
+};
 
 // === ข้อมูลเริ่มต้น (ตัวอย่าง 6 items = 3 คอลัมน์ x 2 boxes) ===
 const initialItems = [
@@ -256,15 +275,10 @@ export default function PortfolioClient() {
                 >
                   {/* รูปภาพ Project */}
                   <div className="w-full h-48 bg-zinc-900 overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
+                    <ImageWithSignedUrl
                       src={item.imageUrl}
                       alt={item.title}
                       className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // ถ้ารูปภาพโหลดไม่ได้ ให้แสดง placeholder
-                        e.target.src = "https://via.placeholder.com/800x400/1f2937/9ca3af?text=No+Image";
-                      }}
                     />
                   </div>
 

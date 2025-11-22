@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { getSignedImageUrl } from "../../lib/imageUtils";
 
 // สร้าง Type แบบง่ายๆ ไว้ดัก Error
 interface Project {
@@ -13,13 +14,18 @@ interface Project {
 }
 
 export default function ProjectCard({ project }: { project: Project }) {
+  // แปลง imageUrl เป็น full backend URL
+  const imageUrl = project.imageUrl 
+    ? getSignedImageUrl(project.imageUrl) 
+    : "https://placehold.co/600x400?text=No+Image";
+
   return (
     <div className="group relative overflow-hidden rounded-2xl bg-zinc-900 border border-zinc-800 hover:border-zinc-600 transition-all duration-300 shadow-lg hover:shadow-2xl hover:-translate-y-1">
       
       {/* 1. ส่วนรูปภาพ */}
       <div className="relative h-48 w-full overflow-hidden bg-zinc-800">
         <img
-          src={project.imageUrl || "https://placehold.co/600x400?text=No+Image"} 
+          src={imageUrl} 
           alt={project.title}
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
         />

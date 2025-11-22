@@ -1,4 +1,5 @@
 import Container from "../components/Container";
+import { getSignedImageUrl } from "../../lib/imageUtils";
 // import Image from "next/image"; // ถ้าอยากใช้ next/image ก็เปิดบรรทัดนี้
 
 // 1. ฟังก์ชันดึงข้อมูล Server Side
@@ -8,7 +9,12 @@ async function getAboutData() {
       cache: "no-store",
     });
     if (!res.ok) throw new Error("Failed");
-    return res.json();
+    const data = await res.json();
+    // แปลง imageUrl เป็น full backend URL
+    if (data && data.imageUrl) {
+      data.imageUrl = getSignedImageUrl(data.imageUrl);
+    }
+    return data;
   } catch (error) {
     console.error(error);
     return null;
