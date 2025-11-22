@@ -1,71 +1,174 @@
 "use client";
-
-import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
+import { useState, useRef, useEffect } from "react";
 
-const STORAGE_KEY = "site_logo_base64_v1";
+// === 1. กำหนด URL ของ API Backend ===
+// ตรงนี้ต้องตรงกับ @Controller('hero-section') ของคุณ
+const API_URL = "http://localhost:3005/api/hero-section"; 
 
-// LogoEditor is a small client-side utility to let the user replace the
-// sidebar logo image. The image is stored in localStorage as a base64
-// data URL so edits persist in the browser. This is intentionally a
-// client-only tool (no server upload) and is useful for quick branding.
-export default function LogoEditor({ size = 36 }) {
+export default function LogoEditor({ size = 36, showControls = true }) {
   const [logo, setLogo] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef(null);
 
+  // === 2. ฟังก์ชัน: โหลด Logo จาก Database ===
   useEffect(() => {
-    try {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) setLogo(cached);
-    } catch (e) {
-      // ignore
-    }
+    const fetchLogo = async () => {
+      try {
+        // แก้ไข: ลบ /1 ออก ให้ยิงไปที่ http://localhost:3001/hero-section โดยตรง
+        const res = await fetch(API_URL); 
+        if (res.ok) {
+          const data = await res.json();
+          if (data.imageUrl) {
+            setLogo(data.imageUrl);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch logo:", error);
+      }
+    };
+
+    fetchLogo();
   }, []);
 
-  // Read the selected file and store it as a base64 data URL in localStorage
+  // === 3. ฟังก์ชัน: อัปโหลดรูปและบันทึก (S3 Upload) ===
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      const base = reader.result;
-      try {
-        localStorage.setItem(STORAGE_KEY, base);
-      } catch (e) {
-        console.error("unable to save logo", e);
+
+    if (!file.type.startsWith("image/")) {
+      alert("Please select an image file");
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      alert("Image size should be less than 2MB");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      // อัปโหลดไป S3 ก่อน
+      const formDataToUpload = new FormData();
+      formDataToUpload.append('file', file);
+
+      const uploadRes = await fetch('http://localhost:3005/api/upload/image', {
+        method: 'POST',
+        body: formDataToUpload,
+      });
+
+      if (!uploadRes.ok) {
+        throw new Error('Failed to upload image to S3');
       }
-      setLogo(base);
-    };
-    reader.readAsDataURL(file);
+
+      const { url } = await uploadRes.json();
+
+      // จากนั้นบันทึก URL ลง Database
+      const res = await fetch(API_URL, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          imageUrl: url
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to update logo");
+      }
+
+      setLogo(url);
+      alert("Logo updated successfully!");
+
+    } catch (error) {
+      console.error("LogoEditor: unable to save logo", error);
+      alert("Failed to save logo. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  // Remove logo from localStorage and reset state
-  const clearLogo = () => {
-    localStorage.removeItem(STORAGE_KEY);
-    setLogo(null);
+  // === 4. ฟังก์ชัน: ลบ Logo ===
+  const clearLogo = async () => {
+    if (!confirm("Are you sure you want to remove the logo?")) return;
+    
+    setIsLoading(true);
+    try {
+       // แก้ไข: ลบ /1 ออก
+       const res = await fetch(API_URL, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ imageUrl: null }), 
+        });
+
+        if (res.ok) {
+            setLogo(null);
+        }
+    } catch (error) {
+        console.error("Failed to remove logo", error);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex items-center gap-3">
       <div className="flex flex-col items-center">
-        <div className="relative" style={{ width: size, height: size }}>
-          {logo ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logo} alt="logo" className="w-full h-full object-cover rounded" />
+        {/* === ส่วนแสดงผลรูปภาพ === */}
+        <div className="relative overflow-hidden rounded border border-zinc-700" style={{ width: size, height: size }}>
+          {isLoading ? (
+            <div className="w-full h-full flex items-center justify-center bg-zinc-800">
+                <span className="text-xs text-gray-400">...</span>
+            </div>
+          ) : logo ? (
+            <Image
+              src={logo}
+              alt="Site Logo"
+              fill
+              sizes={`${size}px`}
+              unoptimized 
+              className="object-cover"
+              priority
+            />
           ) : (
-            <div className="w-full h-full bg-zinc-200 dark:bg-zinc-800 rounded flex items-center justify-center text-zinc-700 dark:text-zinc-300 font-medium">NS</div>
+            <div className="w-full h-full bg-zinc-800 flex items-center justify-center text-white font-semibold text-sm">
+              NS
+            </div>
           )}
         </div>
 
-        <div className="mt-2 flex items-center gap-2">
-          <button onClick={() => inputRef.current?.click()} className="text-[10px] px-1 py-0.5 bg-zinc-100 rounded hover:bg-zinc-200">Edit</button>
-          {logo && (
-            <button onClick={clearLogo} className="text-[10px] px-1 py-0.5 bg-rose-100 text-rose-700 rounded hover:bg-rose-200">Remove</button>
-          )}
-        </div>
+        {/* === ปุ่มควบคุม === */}
+        {showControls && (
+          <div className="mt-2 flex items-center gap-2">
+            <button
+              onClick={() => inputRef.current?.click()}
+              disabled={isLoading}
+              className="text-[10px] px-2 py-1 bg-zinc-800 hover:bg-zinc-700 text-white rounded transition-colors disabled:opacity-50"
+            >
+              {logo ? "Edit" : "Upload"}
+            </button>
+            {logo && (
+              <button
+                onClick={clearLogo}
+                disabled={isLoading}
+                className="text-[10px] px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded transition-colors disabled:opacity-50"
+              >
+                Remove
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      <input ref={inputRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFile}
+        className="hidden"
+      />
     </div>
   );
 }

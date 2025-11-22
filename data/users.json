@@ -1,0 +1,23 @@
+[
+  {
+    "id": "1",
+    "email": "admin@example.com",
+    "name": "Nasran",
+    "password": "123456z",
+    "createdAt": "2025-11-18T00:00:00.000Z"
+  },
+  {
+    "id": "1763557384213",
+    "email": "Nasran0445@gmail.com",
+    "password": "Nasran0445",
+    "name": "Nasran Salaeh",
+    "createdAt": "2025-11-19T13:03:04.213Z"
+  },
+  {
+    "id": "1763558028583",
+    "email": "Nasran11@gmail.com",
+    "password": "Nasran",
+    "name": "John Doe",
+    "createdAt": "2025-11-19T13:13:48.583Z"
+  }
+]

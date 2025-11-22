@@ -1,0 +1,51 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.AboutSectionService = void 0;
+const common_1 = require("@nestjs/common");
+const prisma_service_1 = require("../prisma/prisma.service");
+let AboutSectionService = class AboutSectionService {
+    constructor(prisma) {
+        this.prisma = prisma;
+    }
+    async findOne() {
+        const about = await this.prisma.aboutSection.findUnique({
+            where: { id: 1 },
+        });
+        if (!about) {
+            return this.prisma.aboutSection.create({
+                data: {
+                    id: 1,
+                    title: 'About Me',
+                    description: 'I am a passionate developer...',
+                    imageUrl: 'https://placehold.co/600x400',
+                },
+            });
+        }
+        return about;
+    }
+    update(createAboutSectionDto) {
+        return this.prisma.aboutSection.upsert({
+            where: { id: 1 },
+            update: createAboutSectionDto,
+            create: {
+                id: 1,
+                ...createAboutSectionDto,
+            },
+        });
+    }
+};
+exports.AboutSectionService = AboutSectionService;
+exports.AboutSectionService = AboutSectionService = __decorate([
+    (0, common_1.Injectable)(),
+    __metadata("design:paramtypes", [prisma_service_1.PrismaService])
+], AboutSectionService);
+//# sourceMappingURL=about-section.service.js.map

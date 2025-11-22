@@ -1,0 +1,18 @@
+[
+  {
+    "id": "1763466488636",
+    "name": "jane deo",
+    "email": "jjjj@gmail.com",
+    "message": "test",
+    "createdAt": "2025-11-18T11:48:08.636Z",
+    "status": "new"
+  },
+  {
+    "id": "1763466454775",
+    "name": "john doe",
+    "email": "nnnn@gmail.com",
+    "message": "test",
+    "createdAt": "2025-11-18T11:47:34.775Z",
+    "status": "new"
+  }
+]

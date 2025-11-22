@@ -4,6 +4,7 @@
 
   Notes:
   - We set simple CSS variables for light/dark colors.
+  - Theme variables (--color-*) can be customized via Admin Dashboard.
   - The font variable (--font-poppins) is injected from `layout.js` using
     Next's font loader; we use it as the primary font-family when present.
 */
@@ -11,40 +12,95 @@
 @import "tailwindcss";
 
 :root {
-  /* primary colors for light theme */
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-/* Dark mode overrides */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #1f2937;
+  
+  /* Theme Variables - สามารถแก้ไขได้จาก Admin Dashboard */
+  --color-primary: #10b981;    /* emerald */
+  --color-secondary: #3b82f6;  /* blue */
+  --color-bg: #ffffff;         /* white */
+  --color-text: #1f2937;       /* gray-800 */
+  --color-accent: #ef4444;     /* red */
+  --color-card-bg: #f9fafb;    /* gray-50 */
+  --color-border: #e5e7eb;     /* gray-200 */
+  --border-radius: 12px;       /* rounded corners */
 }
 
 /* Apply colors and preferred font. The `--font-poppins` variable is set
    in `layout.js` (Next font loader). When not provided the browser will
    fall back to system fonts. */
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-bg);
+  color: var(--color-text);
   font-family: var(--font-poppins), system-ui, -apple-system, "Segoe UI",
     Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
     "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
-/* Small visual polish for the sidebar and main content */
-.sidebar-title {
-  color: var(--foreground);
+/* Utility classes for theme colors */
+.bg-theme-primary {
+  background-color: var(--color-primary);
 }
 
-/* Make links inside the aside more visible */
-aside a {
-  text-decoration: none;
+.bg-theme-secondary {
+  background-color: var(--color-secondary);
 }
 
-@media (max-width: 768px) {
-  aside { display: none; }
+.bg-theme-bg {
+  background-color: var(--color-bg);
 }
+
+.text-theme-primary {
+  color: var(--color-primary);
+}
+
+.text-theme-secondary {
+  color: var(--color-secondary);
+}
+
+.text-theme-text {
+  color: var(--color-text);
+}
+
+.border-theme-primary {
+  border-color: var(--color-primary);
+}
+
+.border-theme-secondary {
+  border-color: var(--color-secondary);
+}
+
+.bg-theme-card {
+  background-color: var(--color-card-bg);
+}
+
+.border-theme {
+  border-color: var(--color-border);
+}
+
+.rounded-theme {
+  border-radius: var(--border-radius);
+}
+
+/* Shadow utilities based on data-shadow attribute */
+[data-shadow="none"] .shadow-theme {
+  box-shadow: none;
+}
+
+[data-shadow="sm"] .shadow-theme {
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+[data-shadow="md"] .shadow-theme {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+[data-shadow="lg"] .shadow-theme {
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+}
+
+[data-shadow="xl"] .shadow-theme {
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+}
+
+
